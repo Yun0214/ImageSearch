@@ -48,7 +48,7 @@ object BindingAdapter {
             Util.hideKeyboard()
             (usecase.get() as UsecaseImageSearch).run {
                 page.set(1)
-                getUserProfileData()
+                getSearchResultData()
             }
             flag.set(false)
         }

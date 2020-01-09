@@ -47,6 +47,6 @@ class MainViewModel : ViewModel(), Util.FunUtil {
     private fun movePage(updownFlag:Boolean){
 
         page.set( page.get() + (if(updownFlag) 1 else -1) )
-        (useCaseImageSearch.get() as UsecaseImageSearch).getUserProfileData()
+        (useCaseImageSearch.get() as UsecaseImageSearch).getSearchResultData()
     }
 }

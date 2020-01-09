@@ -10,7 +10,7 @@ class UsecaseImageSearch {
     lateinit var model: ObservableField<SearchResultData>
     lateinit var page : ObservableInt
 
-    fun getUserProfileData() {
+    fun getSearchResultData() {
         Util.showLoading()
         try {
             DataFactory().getSearchResult(keyword.get()?: "",model,page.get())
