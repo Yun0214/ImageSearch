@@ -7,7 +7,6 @@ import androidx.databinding.*
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.imagesearch.data.UsecaseImageSearch
 import com.example.imagesearch.data.SearchResultData
 import com.example.imagesearch.ui.base.BindingRecyclerViewAdapter
 import com.example.imagesearch.ui.base.BaseItemViewModel
@@ -41,15 +40,12 @@ object BindingAdapter {
         },1000)
     }
 
-    @BindingAdapter("searchTrigger","usecaseSet")
+    @BindingAdapter("searchTrigger","searchFun")
     @JvmStatic
-    fun searchProcess(view: View,flag: ObservableBoolean,usecase: ObservableField<UsecaseImageSearch>){
+    fun searchProcess(view: View,flag: ObservableBoolean, process: () -> Unit){
         if(flag.get()){
             Util.hideKeyboard()
-            (usecase.get() as UsecaseImageSearch).run {
-                page.set(1)
-                getSearchResultData()
-            }
+            process.invoke()
             flag.set(false)
         }
     }
@@ -70,6 +66,18 @@ object BindingAdapter {
     @JvmStatic
     fun setIntToString(view:TextView, int : Int){
         view.text = DecimalFormat("###,###").format(int)
+    }
+
+    /**
+     * drag -> top
+     */
+    @BindingAdapter("topDrag")
+    @JvmStatic
+    fun dragToTop(view:RecyclerView, flag: ObservableBoolean){
+        if(flag.get()){
+            view.smoothScrollToPosition(0)
+            flag.set(false)
+        }
     }
 
     /**

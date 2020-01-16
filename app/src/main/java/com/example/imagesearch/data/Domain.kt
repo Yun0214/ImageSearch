@@ -6,18 +6,14 @@ import androidx.databinding.ObservableInt
 import com.example.imagesearch.Util
 
 class UsecaseImageSearch {
-    lateinit var keyword : ObservableField<String>
-    lateinit var model: ObservableField<SearchResultData>
-    lateinit var page : ObservableInt
 
-    fun getSearchResultData() {
+    fun getSearchResultData(repository: ImageSearchRepository) {
         Util.showLoading()
         try {
-            DataFactory().getSearchResult(keyword.get()?: "",model,page.get())
+            DataFactory().getSearchResult(repository.keyword.get()?: "",repository.searchResultDataModel,repository.page.get())
         }catch (e: Exception){
             Log.e("error -> ",e.message.toString())
         }
-
     }
 }
 

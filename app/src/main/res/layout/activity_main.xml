@@ -11,7 +11,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     android:focusable="true"
     android:focusableInTouchMode="true"
-    usecaseSet = "@{vm.useCaseImageSearch}"
+    searchFun = "@{vm::searchProcess}"
     searchTrigger = "@{vm.searchFlag}"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -21,7 +21,7 @@
     <EditText
         android:id="@+id/editText"
         searchTrigger="@{vm.searchFlag}"
-        userInput="@{vm.keyword}"
+        userInput="@{vm.imageSearchRepository.keyword}"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -29,7 +29,7 @@
         android:ems="10"
         android:hint="검색어를 입력해주세요. (자동검색)"
         android:inputType="textPersonName"
-        android:text="@={vm.keyword}"
+        android:text="@={vm.imageSearchRepository.keyword}"
         android:textColor="#2a2a2a"
         android:textColorHint="#999999"
         android:textSize="14sp"
@@ -51,7 +51,8 @@
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        OneModel="@{vm.searchResultDataModel}"
+        OneModel="@{vm.imageSearchRepository.searchResultDataModel}"
+        topDrag="@{vm.topFlag}"
         app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
         app:layout_constraintBottom_toTopOf="@+id/view2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -72,7 +73,7 @@
 
     <TextView
         android:onClick="@{(v)-> vm.beforeClick(v)}"
-        visibility="@{vm.page != 1}"
+        visibility="@{vm.imageSearchRepository.page != 1}"
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -85,7 +86,7 @@
 
     <TextView
         android:id="@+id/textView2"
-        intToString="@{vm.page}"
+        intToString="@{vm.imageSearchRepository.page}"
         android:layout_width="32dp"
         android:layout_height="23dp"
         android:layout_marginBottom="8dp"
@@ -100,7 +101,7 @@
 
     <TextView
         android:onClick="@{(v)-> vm.nextClick(v)}"
-        visibility="@{vm.searchResultDataModel.component3() != 0 &amp;&amp; vm.searchResultDataModel.component2() == false}"
+        visibility="@{vm.imageSearchRepository.searchResultDataModel.component3() != 0 &amp;&amp; vm.imageSearchRepository.searchResultDataModel.component2() == false}"
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -142,7 +143,7 @@
 
     <TextView
         android:id="@+id/textView5"
-        intToString="@{vm.searchResultDataModel.component3()}"
+        intToString ="@{vm.imageSearchRepository.searchResultDataModel.component3()}"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginBottom="4dp"
