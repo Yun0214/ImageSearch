@@ -1,8 +1,8 @@
 package com.example.imagesearch.data
 
 import com.example.imagesearch.Constants
-import com.google.gson.JsonObject
-import retrofit2.Call
+import com.example.imagesearch.domain.entity.ImageSearchResultData
+import kotlinx.coroutines.Deferred
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Query
@@ -10,9 +10,9 @@ import retrofit2.http.Query
 interface ServerAPI {
 
     @GET(Constants.KAKAO_IMAGE_SEARCH_URL)
-    fun getProfileData(
+    suspend fun getSearchResultData(
         @Header("Authorization" ) key: String,
         @Query("query") keyword: String,
         @Query("page") page: Int,
-        @Query("size") size: Int) : Call<JsonObject>
+        @Query("size") size: Int) : ImageSearchResultData
 }

@@ -1,48 +1,117 @@
 package com.example.imagesearch.ui.search
 
-import android.view.View
-import androidx.databinding.ObservableBoolean
-import androidx.lifecycle.ViewModel
-import com.example.imagesearch.App
-import com.example.imagesearch.Util
-import com.example.imagesearch.data.ImageSearchRepository
-import com.example.imagesearch.data.UsecaseImageSearch
-
-class MainViewModel : ViewModel(), Util.FunUtil {
-
-    val searchFlag = ObservableBoolean()
-    val topFlag = ObservableBoolean()
-
-    val imageSearchRepository = ImageSearchRepository()
-    val usecaseImageSearch = UsecaseImageSearch()
+import android.text.Editable
+import com.example.imagesearch.data.repository.ImageSearchRepository
+import com.example.imagesearch.domain.entity.ImageSearchDocumentsData
+import com.example.imagesearch.domain.entity.ImageSearchMetaData
+import com.example.imagesearch.domain.entity.ImageSearchResultData
+import com.example.imagesearch.domain.usecase.GetImageSearchData
+import com.example.imagesearch.ui.base.BaseItemViewModel
+import com.example.imagesearch.ui.base.BaseViewModel
+import com.example.imagesearch.ui.base.BindingRecyclerViewAdapter
+import com.example.imagesearch.ui.mapper.ImageSearchDocumentMapper
+import kotlinx.coroutines.*
 
 
-    fun searchProcess(){
-        imageSearchRepository.page.set(1)
-        usecaseImageSearch.getSearchResultData(imageSearchRepository)
+class MainViewModel(private val imageSearchRepository : ImageSearchRepository) : BaseViewModel() {
+
+    private val getImageSearchData = GetImageSearchData()
+    private var searchProcess : Job? = null
+
+    val imageAdapter = BindingRecyclerViewAdapter()
+    var total = ""
+    var nextPageFlag = false
+    var page = ""
+
+    fun searchTextWatcher(t: Editable?){
+        vmScope.launch {
+            if((t?: " ").isNotBlank()) {
+                searchProcess?.run { if(isActive) cancel() }
+                searchProcess = searchScope(t.toString())
+            } else {
+                searchProcess?.run { if(isActive) cancel() }
+            }
+        }
     }
 
-    fun topClick(v: View){
-        v.preventDoubleClick(200)
-
-        topFlag.set(true)
+    fun pageMoveClick(nextFlag: Boolean){
+        vmScope.launch {
+            callDrag()
+            searchScope(updownFlag = nextFlag)
+        }
     }
 
-    fun beforeClick(v: View){
-        v.preventDoubleClick(150)
-
-        movePage(false)
+    fun topClick(){
+        callDrag()
     }
 
-    fun nextClick(v: View){
-        v.preventDoubleClick(150)
+    private suspend fun searchScope(keyword : String = "", updownFlag: Boolean? = null) = vmScope.launch {
+        if(keyword != "") delay(1000)
 
-        movePage(true)
+        callLoadingDialog(true)
+
+        getSearchResult(updownFlag,keyword)?.let {
+            callLoadingDialog(false)
+            callDrag()
+            callViewUpdate(it)
+        } ?: run {
+            callLoadingDialog(false)
+        }
     }
 
-    private fun movePage(updownFlag:Boolean){
+    private suspend fun getSearchResult(updownFlag: Boolean?, keyword: String) : ImageSearchResultData?{
 
-        imageSearchRepository.page.set(imageSearchRepository.page.get() + (if(updownFlag) 1 else -1))
-        usecaseImageSearch.getSearchResultData(imageSearchRepository)
+        return getImageSearchData.getSearchResultData(imageSearchRepository.apply {
+            page = when(updownFlag){
+                true -> page + 1
+                false -> page - 1
+                else -> {
+                    searchKeyword = keyword
+                    1
+                }
+            }
+        })
+    }
+
+
+    private fun callLoadingDialog(flag: Boolean){
+        loadingActor?.offer(flag)
+    }
+
+    private fun callDrag(){
+        dragActor?.offer(0)
+    }
+
+    private fun callViewUpdate(data: ImageSearchResultData){
+        vmDataUpdate(data.meta)
+        adapterListUp(data.documents)
+
+        viewUpdateActor?.offer(0)
+    }
+
+    private fun vmDataUpdate(data : ImageSearchMetaData){
+        data.run {
+            total = pageable_count.toString()
+            nextPageFlag = !is_end
+            page = imageSearchRepository.page.toString()
+        }
+    }
+
+    private fun adapterListUp(list : ArrayList<ImageSearchDocumentsData>){
+        imageAdapter.run {
+            clearList()
+            addList( makeItemVmList(list) )
+            notifyDataSetChanged()
+        }
+    }
+
+    private fun makeItemVmList(list: ArrayList<ImageSearchDocumentsData>) : ArrayList<BaseItemViewModel>{
+        return ArrayList<BaseItemViewModel>().apply {
+            for((i,entity) in list.withIndex()){
+                add(ImageSearchDocumentMapper().fromEntity(entity).also {
+                    it.position = i+1
+                })
+            }
+        }
     }
 }

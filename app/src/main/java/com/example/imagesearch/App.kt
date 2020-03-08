@@ -1,12 +1,13 @@
 package com.example.imagesearch
 
 import android.app.Application
-import androidx.databinding.ObservableBoolean
 import com.example.imagesearch.data.ServerAPI
-import com.example.nrise.ui.base.BaseActivity
+import com.example.imagesearch.ui.base.BaseActivity
+import com.example.imagesearch.util.diModule
 import okhttp3.JavaNetCookieJar
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.android.ext.android.startKoin
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.CookieManager
@@ -20,7 +21,6 @@ class App : Application() {
 
     companion object Instance {
         lateinit var INSTANCE : App
-        lateinit var currentActivity: BaseActivity
     }
 
     init {
@@ -75,8 +75,8 @@ class App : Application() {
                 override fun getAcceptedIssuers(): Array<X509Certificate>? {
                     return null
                 }
-                override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
-                override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+                override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) = Unit
+                override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) = Unit
             })
 
             var ctx: SSLContext? = null
@@ -97,5 +97,10 @@ class App : Application() {
 
             return builder
         }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        startKoin(INSTANCE, diModule)
     }
 }

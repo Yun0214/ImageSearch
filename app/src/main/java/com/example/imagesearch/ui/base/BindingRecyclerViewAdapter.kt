@@ -1,9 +1,10 @@
 package com.example.imagesearch.ui.base
 
 import android.view.*
-import androidx.core.view.updateLayoutParams
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.imagesearch.App
 import com.example.imagesearch.Constants
 import com.example.imagesearch.R
 import com.example.imagesearch.databinding.ItemImgaeBinding
@@ -49,9 +50,16 @@ open class BindingRecyclerViewAdapter : RecyclerView.Adapter<BindingViewHolder<V
         val bind = holder.binding()
 
         when (viewTypeList[position]) {
-            Constants.ITEMVIEW_IMAGE -> { bind as ItemImgaeBinding
-                bind.vm = list[position]
-            }
+            Constants.ITEMVIEW_IMAGE -> { itemImageViewInit(bind as? ItemImgaeBinding,list[position]) }
+        }
+    }
+
+    private fun itemImageViewInit(bind: ItemImgaeBinding?, vm: BaseItemViewModel){
+        bind?.run {
+
+            Glide.with(App.INSTANCE).load(vm.imageUrl).placeholder(R.drawable.ic_launcher_foreground).into(ivImage)
+
+            tvPosition.text = vm.position.toString()
         }
     }
 }
